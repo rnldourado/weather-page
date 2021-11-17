@@ -1,10 +1,12 @@
 import { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 
 
 function App() {
 
   const [city, setCity] = useState('');
   const [isNotFound, setIsNotFound] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [weatherForecast, setWeatherForecast] = useState(null);
 
@@ -13,6 +15,9 @@ function App() {
   }
 
   const searchForecastWeather = () => {
+
+    setIsLoading(true);
+    if (!city) return;
     fetch(`http://api.weatherapi.com/v1/current.json?key=37cce82af5f441e7a5c71337211511&q=${city}&lang=pt`)
       .then((response) => {
         if (response.status === 200) {
@@ -20,18 +25,30 @@ function App() {
           setIsNotFound(false)
           return response.json();
         } else if (response.status >= 400 && response.status < 500) {
+          // setIsLoading(false)
           setIsNotFound(true);
+
         }
       })
       .then((data) => {
+        setIsLoading(false)
         setWeatherForecast(data);
         // console.log(data);
       })
+      .catch((err) => {
+        throw new Error(err);
+      })
+
+    toast('Loading...', {
+      "duration": 5000,
+    });
+
   }
 
 
   return (
     <div>
+      {isLoading ? <Toaster /> : null}
       <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
         <a href="locahost" className="navbar-brand">City Weather</a>
       </nav>
