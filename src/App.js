@@ -3,8 +3,8 @@ import { useState } from "react";
 
 function App() {
 
-
   const [city, setCity] = useState('');
+  const [isNotFound, setIsNotFound] = useState(false);
 
   const [weatherForecast, setWeatherForecast] = useState(null);
 
@@ -16,36 +16,42 @@ function App() {
     fetch(`http://api.weatherapi.com/v1/current.json?key=37cce82af5f441e7a5c71337211511&q=${city}&lang=pt`)
       .then((response) => {
         if (response.status === 200) {
+          setCity('')
+          setIsNotFound(false)
           return response.json();
+        } else if (response.status >= 400 && response.status < 500) {
+          setIsNotFound(true);
         }
       })
       .then((data) => {
         setWeatherForecast(data);
-        console.log(data);
+        // console.log(data);
       })
   }
+
 
   return (
     <div>
       <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-        <a href="locahost" className="navbar-brand">EBAC Weather</a>
+        <a href="locahost" className="navbar-brand">City Weather</a>
       </nav>
 
       <main className="container" id="search">
         <div className="jumbotron">
           <h1>Verifique agora a previsão do tempo na sua cidade</h1>
-          <p className="lead">Digite a sua cidade no campo abaixo e em seguida clique em porcurar.</p>
+          <label className="label-control">Digite a sua cidade no campo abaixo e em seguida clique em porcurar.</label>
+          <input type="text" className="form-control" value={city} onChange={handleCityChange} />
 
           <div className="mb-4 ">
             <div className="col-sm-6">
-              <input type="text" className="form-control" value={city} onChange={handleCityChange} />
             </div>
           </div>
 
           <button className="btn btn-lg btn-primary" onClick={searchForecastWeather}>Pesquisar</button>
-
           {
-            weatherForecast ? (
+            isNotFound ? (
+              <h3 className="lead mt-4 red">Cidade não encontrada</h3>
+            ) : weatherForecast ? (
               <div className="mt-4 d-flex align-items-center">
                 <div className="col-sm-1">
                   <img src={weatherForecast.current.condition.icon} alt={weatherForecast.current.condition.text} />
@@ -68,5 +74,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;
